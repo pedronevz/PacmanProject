@@ -94,7 +94,6 @@ class ReflexAgent(Agent):
                 return float('-inf')
             score -= nearestGhostDistance    # Maior o score, mais proximo do fantasma
 
-
         return score
 
 def scoreEvaluationFunction(currentGameState: GameState):
