@@ -81,20 +81,29 @@ class ReflexAgent(Agent):
         
         score = successorGameState.getScore()
 
+        # Distancia de Manhattan entre a posicao atual do Pacman e cada posicao de comida
+        foodDistances = [manhattanDistance(newPos, food) for food in newFood.asList()]
+        if foodDistances:
+            nearestFoodDistance = min(foodDistances)
+            # Mais perto da comida, maior o score 
+            score -= nearestFoodDistance    
+
+        # Incentivar o pacman a ir comer
+        if currentGameState.getNumFood() > successorGameState.getNumFood():
+            score += 100 
+        
+        if currentGameState.getNumFood() < successorGameState.getNumFood():
+            score -= 50 
+
         # Distancia de Manhattan entre a posicao do Pacman e cada posicao de fantasma
         ghostDistances = [manhattanDistance(newPos, ghost.getPosition()) for ghost in newGhostStates]
         if ghostDistances:
             nearestGhostDistance = min(ghostDistances) 
-            if nearestGhostDistance == 0:
+            if nearestGhostDistance <= 1:
                 # Caso pacman seja capturado, retornar uma pontuacao baixissima
                 return float('-inf')
-            score += nearestGhostDistance    # Mais longe do fantasma, maior o score
-        
-        # Distancia de Manhattan entre a posicao atual do Pacman e cada posicao de comida
-        foodDistances = [manhattanDistance(newPos, food) for food in newFood.asList()]
-        if foodDistances:
-            nearestFoodDistance = min(foodDistances) 
-            score -= nearestFoodDistance    # Mais perto da comida, maior o score
+            # Mais longe do fantasma, maior o score
+            score += nearestGhostDistance    
 
         return score
 
