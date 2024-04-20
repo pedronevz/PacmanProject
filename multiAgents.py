@@ -75,24 +75,26 @@ class ReflexAgent(Agent):
         newScaredTimes = [ghostState.scaredTimer for ghostState in newGhostStates]
 
         "*** YOUR CODE HERE ***"
-        # Inicializar o score
-        score = 0
+        # Ganhar retorna score altissimo
+        if successorGameState.isWin():
+            return float('+inf')
+        
+        score = successorGameState.getScore()
 
-        # Calcula-se a distancia do pacman em relacao a comida e ao fantasma mais proximos
-        # Distancia de Manhattan entre a posicao atual do Pacman e cada posicao de comida
-        foodDistances = [manhattanDistance(newPos, food) for food in newFood.asList()]
-        if foodDistances:
-            nearestFoodDistance = min(foodDistances) # Pega a distancia de Manhattan para a posicao da comida mais proxima
-            score -= nearestFoodDistance    # Maior o score, mais proximo da comida
-
-        # Distancia de Manhattan entre a posicao atual do Pacman e cada posicao de fantasma
+        # Distancia de Manhattan entre a posicao do Pacman e cada posicao de fantasma
         ghostDistances = [manhattanDistance(newPos, ghost.getPosition()) for ghost in newGhostStates]
         if ghostDistances:
-            nearestGhostDistance = min(ghostDistances) # Pega a distancia de Manhattan para a posicao da comida mais proxima
+            nearestGhostDistance = min(ghostDistances) 
             if nearestGhostDistance == 0:
                 # Caso pacman seja capturado, retornar uma pontuacao baixissima
                 return float('-inf')
-            score -= nearestGhostDistance    # Maior o score, mais proximo do fantasma
+            score += nearestGhostDistance    # Mais longe do fantasma, maior o score
+        
+        # Distancia de Manhattan entre a posicao atual do Pacman e cada posicao de comida
+        foodDistances = [manhattanDistance(newPos, food) for food in newFood.asList()]
+        if foodDistances:
+            nearestFoodDistance = min(foodDistances) 
+            score -= nearestFoodDistance    # Mais perto da comida, maior o score
 
         return score
 
