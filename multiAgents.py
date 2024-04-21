@@ -166,8 +166,38 @@ class MinimaxAgent(MultiAgentSearchAgent):
         Returns whether or not the game state is a losing state
         """
         "*** YOUR CODE HERE ***"
-        util.raiseNotDefined()
+        # Funcao recursiva minimax para busca da ação a ser tomada
+        # agentIndex = 0 p/ pacman
+        action, score = self.minimax(gameState, 0, self.depth)
+        # minimax retorna melhor ação calculada
+        return action
+    
+    def minimax(self, state, agentIndex, depth):
+        # Verifica término da busca
+        if state.isWin() or state.isLose() or depth == 0:
+            return None, self.evaluationFunction(state)
 
+        # Pacman + fantasmas existentes
+        numAgents = state.getNumAgents()
+        # Movimento com todos os agentes
+        nextAgent = (agentIndex + 1) % numAgents
+        # Se o proximo agente a jogar for o pacman, acabou a rodada
+        nextDepth = depth - 1 if nextAgent == 0 else depth
+        results = []
+
+        # Sobre ações do agente da vez
+        for action in state.getLegalActions(agentIndex):
+            # Salva estado pos ação
+            next_state = state.generateSuccessor(agentIndex, action)
+            _, score = self.minimax(next_state, nextAgent, nextDepth)
+            results.append((action, score))                     # interessante dar um print(results) para entender as tuplas
+            
+        # Se o agente atual é o Pacman (max)
+        if agentIndex == 0:
+            return max(results, key=lambda x: x[1])
+        else:  # Se o agente atual é um fantasma (mini)
+            return min(results, key=lambda x: x[1])
+        
 class AlphaBetaAgent(MultiAgentSearchAgent):
     """
     Your minimax agent with alpha-beta pruning (question 3)
