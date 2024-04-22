@@ -211,7 +211,6 @@ class AlphaBetaAgent(MultiAgentSearchAgent):
         # Inicializa os valores de alfa e beta conforme pseudo-código do algoritmo
         alpha = float("-inf")
         beta = float("inf")
-        # Faz a chamada inicial para o método
         bestAction, _ = self.alphabeta(gameState, 0, self.depth, alpha, beta)
         return bestAction
     
@@ -237,7 +236,6 @@ class AlphaBetaAgent(MultiAgentSearchAgent):
         bestValue = float("-inf")
         bestAction = None
 
-        #Itera sobre todas as ações legais e chama recursivamente o método alphabeta para os estados sucessores. 
         #Aqui, atualiza os valores de alfa e beta conforme necessário e retorna a melhor ação e o melhor valor.
         for action in state.getLegalActions(agentIndex):
             next_state = state.generateSuccessor(agentIndex, action)
@@ -251,7 +249,7 @@ class AlphaBetaAgent(MultiAgentSearchAgent):
         return bestAction, bestValue
 
     def minValue(self, state, agentIndex, nextAgent, depth, alpha, beta):
-        #Usado para calcular o valor mínimo possível para os fantasmas. 
+        #Método usado para calcular o valor mínimo possível para os fantasmas. 
         bestValue = float("inf")
         bestAction = None
 
@@ -279,8 +277,32 @@ class ExpectimaxAgent(MultiAgentSearchAgent):
         All ghosts should be modeled as choosing uniformly at random from their
         legal moves.
         """
-        "*** YOUR CODE HERE ***"
-        util.raiseNotDefined()
+        return self.expectimax(gameState, 0, self.depth)[0]
+
+    def expectimax(self, state, agentIndex, depth):
+        #Ao lidar com agentes que tomam decisões de maneira aleatória, usaremos a média das pontuações.
+        if state.isWin() or state.isLose() or depth == 0:
+            return None, self.evaluationFunction(state), []
+
+        numAgents = state.getNumAgents()
+        nextAgent = (agentIndex + 1) % numAgents
+        nextDepth = depth - 1 if nextAgent == 0 else depth
+        results = [] 
+
+        #Ações possíveis do agente da vez
+        for action in state.getLegalActions(agentIndex):
+            next_state = state.generateSuccessor(agentIndex, action)  #salva estado pos ação
+            _, score, next_results = self.expectimax(next_state, nextAgent, nextDepth)  #calcula para o próximo agente
+            results.append((action, score))
+
+        #Se é o Pacman (max), retornamos a ação com a maior pontuação
+        if agentIndex == 0:
+            best_action, best_score = max(results, key=lambda x: x[1])
+            return best_action, best_score, results
+        else:
+            #Se é um fantasma (chance), usa a média das pontuações
+            avg_score = sum(score for _, score in results) / len(results)
+            return None, avg_score, results
 
 def betterEvaluationFunction(currentGameState: GameState):
     """
