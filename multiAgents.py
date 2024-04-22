@@ -208,7 +208,64 @@ class AlphaBetaAgent(MultiAgentSearchAgent):
         Returns the minimax action using self.depth and self.evaluationFunction
         """
         "*** YOUR CODE HERE ***"
-        util.raiseNotDefined()
+        # Inicializa os valores de alfa e beta conforme pseudo-código do algoritmo
+        alpha = float("-inf")
+        beta = float("inf")
+        # Faz a chamada inicial para o método
+        bestAction, _ = self.alphabeta(gameState, 0, self.depth, alpha, beta)
+        return bestAction
+    
+    def alphabeta(self, state, agentIndex, depth, alpha, beta):
+        #Aqui, mantivemos o código da questão 2, com a adição de alpha-beta pruning
+        #A poda reduz significativamente o número de estados que precisam ser explorados durante a busca.
+        #elimina a necessidade de explorar ramos que não afetarão o resultado final, tornando-a mais eficiente. 
+    
+        if state.isWin() or state.isLose() or depth == 0:
+            return None, self.evaluationFunction(state)
+
+        numAgents = state.getNumAgents()
+        nextAgent = (agentIndex + 1) % numAgents
+        nextDepth = depth - 1 if nextAgent == 0 else depth
+
+        if agentIndex == 0: #PACMAN
+            return self.maxValue(state, agentIndex, nextAgent, nextDepth, alpha, beta)
+        else: #FANTASMAS
+            return self.minValue(state, agentIndex, nextAgent, nextDepth, alpha, beta)
+
+    def maxValue(self, state, agentIndex, nextAgent, depth, alpha, beta):
+        #Método usado para calcular o valor máximo possível para o agente Pac-Man. 
+        bestValue = float("-inf")
+        bestAction = None
+
+        #Itera sobre todas as ações legais e chama recursivamente o método alphabeta para os estados sucessores. 
+        #Aqui, atualiza os valores de alfa e beta conforme necessário e retorna a melhor ação e o melhor valor.
+        for action in state.getLegalActions(agentIndex):
+            next_state = state.generateSuccessor(agentIndex, action)
+            _, value = self.alphabeta(next_state, nextAgent, depth, alpha, beta)
+            if value > bestValue:
+                bestValue = value
+                bestAction = action
+            if bestValue > beta:  
+                return bestAction, bestValue
+            alpha = max(alpha, bestValue)  
+        return bestAction, bestValue
+
+    def minValue(self, state, agentIndex, nextAgent, depth, alpha, beta):
+        #Usado para calcular o valor mínimo possível para os fantasmas. 
+        bestValue = float("inf")
+        bestAction = None
+
+        #Diferente do método anterior, busca o valor mínimo e atualiza os valores de alfa e beta de acordo.
+        for action in state.getLegalActions(agentIndex):
+            next_state = state.generateSuccessor(agentIndex, action)
+            _, value = self.alphabeta(next_state, nextAgent, depth, alpha, beta)
+            if value < bestValue:
+                bestValue = value
+                bestAction = action
+            if bestValue < alpha:  
+                return bestAction, bestValue
+            beta = min(beta, bestValue)  
+        return bestAction, bestValue
 
 class ExpectimaxAgent(MultiAgentSearchAgent):
     """
