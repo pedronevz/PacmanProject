@@ -311,8 +311,36 @@ def betterEvaluationFunction(currentGameState: GameState):
 
     DESCRIPTION: <write something here so we know what you did>
     """
-    "*** YOUR CODE HERE ***"
-    util.raiseNotDefined()
+    if currentGameState.isWin():
+        return float('inf')  # Maximizar a pontuação quando ganhar
+    if currentGameState.isLose():
+        return float('-inf')  # Minimizar a pontuação quando perder
+
+    score = currentGameState.getScore()
+    pacmanPosition = currentGameState.getPacmanPosition()
+    foodList = currentGameState.getFood().asList()
+    ghostStates = currentGameState.getGhostStates()
+    scaredTimes = [ghostState.scaredTimer for ghostState in ghostStates]
+
+    # Comida mais proxima
+    if foodList:
+        nearestFoodDistance = min(manhattanDistance(pacmanPosition, foodPos) for foodPos in foodList)
+        score -= nearestFoodDistance  # Incentivar pacman a ir comer
+
+    # Loc. dos fantasmas
+    ghostDistances = [manhattanDistance(pacmanPosition, ghost.getPosition()) for ghost in ghostStates]
+    for distance, scaredTime in zip(ghostDistances, scaredTimes):
+        if scaredTime > 0: 
+            score += 100 / (distance + 1) # Pontuacao sobe caso pacman se aproxime de um fantasma assustado
+        else:
+            if distance < 2:
+                score -= 1000 # Pontuacao penalizada caso um fantasma esteja muito perto
+
+
+    # Pontuacao penalizada com a quantidade de comida restante
+    score -= (10 * len(foodList))
+
+    return score
 
 # Abbreviation
 better = betterEvaluationFunction
